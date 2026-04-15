@@ -2,22 +2,33 @@ openapi: 3.1.0
 info:
   title: Task API
   version: 1.0.0
+
 servers:
   - url: http://localhost:3000
-    description: Local development servers
-  - url: https://task-api-service-ruig.onrender.com 
-    description: Production server 
+    description: Local development server
+  - url: https://task-api-service-ruig.onrender.com
+    description: Production server
+
 tags:
   - name: Tasks
     description: Task-related endpoints
   - name: Monitoring
-    description: Operational endpoints, such as health checks
+    description: Operational endpoints
+
 paths:
   /tasks:
     get:
       summary: List all tasks
       tags:
         - Tasks
+      parameters:
+        - in: query
+          name: completed
+          required: false
+          schema:
+            type: string
+            enum: [true, false]
+          description: Filter tasks by completion status
       responses:
         '200':
           description: OK
@@ -27,6 +38,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid completed query parameter
+
     post:
       summary: Create a new task
       tags:
@@ -57,18 +71,16 @@ paths:
                     type: array
                     items:
                       type: string
-                example:
-                  errors:
-                    - 'Title must be at least 3 characters'
+
   /health:
     get:
       summary: Health Check
-      description: Returns the current status of the API. Used by Render to verify that the service is running.
+      description: Returns API status
       tags:
         - Monitoring
       responses:
         '200':
-          description: API is running successfully
+          description: API is running
           content:
             application/json:
               schema:
@@ -77,14 +89,15 @@ paths:
                   status:
                     type: string
                     example: ok
+
 components:
   schemas:
     Task:
       type: object
       properties:
         id:
-          readOnly: true
           type: integer
+          readOnly: true
           example: 1
         title:
           type: string
